@@ -1,0 +1,6 @@
+{
+    "name": "Orvibo AllOne remote",
+    "domains": ["remote"],
+    "homeassistant": "2021.6.6",
+    "render_readme": true
+}
