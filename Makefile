@@ -28,3 +28,7 @@ blackfix:
 .PHONY: isort
 isort:
 	$(RUNNER) run isort --atomic $(SOURCE_FOLDER)
+
+.PHONY: test
+test:
+	$(RUNNER) run pytest tests/

@@ -11,6 +11,8 @@ black = "==21.6b0"
 flake8 = "==3.9.2"
 mypy = "==0.910"
 isort = "==5.9.2"
+pytest = "==6.2.4"
+pytest-asyncio = "==0.15.1"
 
 [requires]
 python_version = "3.8"

@@ -62,9 +62,9 @@ async def async_setup_entry(
 
 def _decode_command(command: Union[str, bytes]) -> bytes:
     """Decode command in format that is suitable for IR emitting"""
-    if isinstance(command, str) and command.startswith("b64:"):
+    if type(command) is str and command.startswith("b64:"):
         return b64decode(command.replace("b64:", ""))
-    elif isinstance(command, bytes):
+    elif type(command) is bytes:
         # No need to decode, assuming it is raw
         return command
 
@@ -100,7 +100,7 @@ class OrviboRemote(RemoteEntity):
     async def async_send_command(self, command: Iterable[str], **kwargs: Any) -> None:
         """Send a command to device."""
         for encoded_command in command:
-            _LOGGER.error("Running AllOne command", encoded_command)
+            _LOGGER.info("Running AllOne command", encoded_command)
             raw_command = _decode_command(encoded_command)
             rv = await self._device.emit_ir(raw_command)
             if rv:
