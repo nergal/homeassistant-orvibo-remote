@@ -100,10 +100,11 @@ class OrviboRemote(RemoteEntity):
     async def async_send_command(self, command: Iterable[str], **kwargs: Any) -> None:
         """Send a command to device."""
         for encoded_command in command:
-            _LOGGER.info("Running AllOne command", encoded_command)
+            _LOGGER.info("Running AllOne command => [%s]", encoded_command)
             raw_command = _decode_command(encoded_command)
             rv = await self._device.emit_ir(raw_command)
             if rv:
                 _LOGGER.debug("Emit OK %s", hexlify(rv).decode("utf-8"))
             else:
-                _LOGGER.error("Emit failed %s", command)
+                _LOGGER.error("Emit failed %s", encoded_command)
+

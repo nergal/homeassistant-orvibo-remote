@@ -1,6 +1,11 @@
 RUNNER=pipenv
 SOURCE_FOLDER=custom_components/
 
+.PHONY: init
+init:
+	pip3 install pipenv
+	pipenv install --dev
+
 .PHONY: lint
 lint: black mypy flake
 
