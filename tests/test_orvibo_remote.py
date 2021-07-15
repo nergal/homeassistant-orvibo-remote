@@ -1,20 +1,15 @@
 import pytest
 from unittest.mock import MagicMock
-from custom_components.orvibo_remote.asyncio_orvibo.allone import AllOne
+from custom_components.orvibo_remote.orvibo.orvibo import Orvibo
 from custom_components.orvibo_remote.remote import OrviboRemote
-
-
-class AsyncMock(MagicMock):
-    async def __call__(self, *args, **kwargs):
-        return super(AsyncMock, self).__call__(*args, **kwargs)
 
 
 class TestArguments:
     @pytest.mark.asyncio
     async def test_async_send_command_none(self):
         mocked_name = "Test intance"
-        mocked_device = AllOne(mocked_name, "F2:FF:FF:FF:FF:FF")
-        mocked_device.emit_ir = AsyncMock(return_value=b"any")
+        mocked_device = Orvibo(ip="127.0.0.1", mac="F2FFFFFFFFFF", type=Orvibo.TYPE_IRDA)
+        mocked_device.emit_ir = MagicMock(return_value=b"any")
 
         mocked_command = []
 
@@ -26,8 +21,8 @@ class TestArguments:
     @pytest.mark.asyncio
     async def test_async_send_command_single(self):
         mocked_name = "Test intance"
-        mocked_device = AllOne(mocked_name, "F2:FF:FF:FF:FF:FF")
-        mocked_device.emit_ir = AsyncMock(return_value=b"any")
+        mocked_device = Orvibo(ip="127.0.0.1", mac="F2FFFFFFFFFF", type=Orvibo.TYPE_IRDA)
+        mocked_device.emit_ir = MagicMock(return_value=b"any")
 
         mocked_command = [
             "b64:dGVzdDE=",
@@ -42,8 +37,8 @@ class TestArguments:
     @pytest.mark.asyncio
     async def test_async_send_command_few_commands(self):
         mocked_name = "Test intance"
-        mocked_device = AllOne(mocked_name, "F2:FF:FF:FF:FF:FF")
-        mocked_device.emit_ir = AsyncMock(return_value=b"any")
+        mocked_device = Orvibo(ip="127.0.0.1", mac="F2FFFFFFFFFF", type=Orvibo.TYPE_IRDA)
+        mocked_device.emit_ir = MagicMock(return_value=b"any")
 
         mocked_command = [
             "b64:dGVzdDE=",
@@ -68,8 +63,8 @@ class TestFormats:
     @pytest.mark.asyncio
     async def test_boardlink_format(self):
         mocked_name = "Test intance"
-        mocked_device = AllOne(mocked_name, "F2:FF:FF:FF:FF:FF")
-        mocked_device.emit_ir = AsyncMock(return_value=b"any")
+        mocked_device = Orvibo(ip="127.0.0.1", mac="F2FFFFFFFFFF", type=Orvibo.TYPE_IRDA)
+        mocked_device.emit_ir = MagicMock(return_value=b"any")
 
         mocked_command = [
             "b64:iAAAAAAAiAAAAAAAAAAAAHgAViH6D90BEwa4ATYCzgEiAs0BIgK4ASkGzgEhAs4" +
@@ -93,8 +88,8 @@ class TestFormats:
     @pytest.mark.asyncio
     async def test_raw(self):
         mocked_name = "Test intance"
-        mocked_device = AllOne(mocked_name, "F2:FF:FF:FF:FF:FF")
-        mocked_device.emit_ir = AsyncMock(return_value=b"any")
+        mocked_device = Orvibo(ip="127.0.0.1", mac="F2FFFFFFFFFF", type=Orvibo.TYPE_IRDA)
+        mocked_device.emit_ir = MagicMock(return_value=b"any")
 
         expected_result = bytes.fromhex(
             '8800 0000 0000 8800 0000 0000 0000 0000 7800 5621 fa0f dd01 1306 ' +
