@@ -1,6 +1,6 @@
 {
     "name": "Orvibo AllOne remote",
     "domains": ["remote"],
-    "homeassistant": "2021.6.6",
+    "homeassistant": "2025.12.5",
     "render_readme": true
 }

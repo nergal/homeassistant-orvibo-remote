@@ -1,0 +1,15 @@
+exclude = [
+    "custom_components/orvibo_remote/orvibo/**",
+]
+line-length = 80
+indent-width = 4
+target-version = "py313"
+
+[lint]
+mccabe.max-complexity = 18
+select = [
+    "B","C","E","F","W","B9"
+]
+ignore = [
+    "E203", "E266", "E501"
+]
