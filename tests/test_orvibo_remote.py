@@ -1,12 +1,10 @@
-import pytest
 from unittest.mock import MagicMock
 from custom_components.orvibo_remote.orvibo.orvibo import Orvibo
 from custom_components.orvibo_remote.remote import OrviboRemote
 
 
 class TestArguments:
-    @pytest.mark.asyncio
-    async def test_async_send_command_none(self):
+    def test_send_command_none(self):
         mocked_name = "Test intance"
         mocked_device = Orvibo(ip="127.0.0.1", mac="F2FFFFFFFFFF", type=Orvibo.TYPE_IRDA)
         mocked_device.emit_ir = MagicMock(return_value=b"any")
@@ -14,12 +12,11 @@ class TestArguments:
         mocked_command = []
 
         instance = OrviboRemote(mocked_name, mocked_device)
-        await instance.async_send_command(command=mocked_command)
+        instance.send_command(command=mocked_command)
 
         mocked_device.emit_ir.assert_not_called()
 
-    @pytest.mark.asyncio
-    async def test_async_send_command_single(self):
+    def test_send_command_single(self):
         mocked_name = "Test intance"
         mocked_device = Orvibo(ip="127.0.0.1", mac="F2FFFFFFFFFF", type=Orvibo.TYPE_IRDA)
         mocked_device.emit_ir = MagicMock(return_value=b"any")
@@ -30,12 +27,11 @@ class TestArguments:
         expected_result = b"test1"
 
         instance = OrviboRemote(mocked_name, mocked_device)
-        await instance.async_send_command(command=mocked_command)
+        instance.send_command(command=mocked_command)
 
         mocked_device.emit_ir.assert_called_once_with(expected_result)
 
-    @pytest.mark.asyncio
-    async def test_async_send_command_few_commands(self):
+    def test_send_command_few_commands(self):
         mocked_name = "Test intance"
         mocked_device = Orvibo(ip="127.0.0.1", mac="F2FFFFFFFFFF", type=Orvibo.TYPE_IRDA)
         mocked_device.emit_ir = MagicMock(return_value=b"any")
@@ -52,7 +48,7 @@ class TestArguments:
         ]
 
         instance = OrviboRemote(mocked_name, mocked_device)
-        await instance.async_send_command(command=mocked_command)
+        instance.send_command(command=mocked_command)
 
         assert len(mocked_command) == mocked_device.emit_ir.call_count
         for expected_result in expected_results:
@@ -60,8 +56,7 @@ class TestArguments:
 
 
 class TestFormats:
-    @pytest.mark.asyncio
-    async def test_boardlink_format(self):
+    def test_boardlink_format(self):
         mocked_name = "Test intance"
         mocked_device = Orvibo(ip="127.0.0.1", mac="F2FFFFFFFFFF", type=Orvibo.TYPE_IRDA)
         mocked_device.emit_ir = MagicMock(return_value=b"any")
@@ -81,12 +76,11 @@ class TestFormats:
         )
 
         instance = OrviboRemote(mocked_name, mocked_device)
-        await instance.async_send_command(command=mocked_command)
+        instance.send_command(command=mocked_command)
 
         mocked_device.emit_ir.assert_called_once_with(expected_result)
 
-    @pytest.mark.asyncio
-    async def test_raw(self):
+    def test_raw(self):
         mocked_name = "Test intance"
         mocked_device = Orvibo(ip="127.0.0.1", mac="F2FFFFFFFFFF", type=Orvibo.TYPE_IRDA)
         mocked_device.emit_ir = MagicMock(return_value=b"any")
@@ -101,6 +95,6 @@ class TestFormats:
         )
 
         instance = OrviboRemote(mocked_name, mocked_device)
-        await instance.async_send_command(command=[expected_result])
+        instance.send_command(command=[expected_result])
 
         mocked_device.emit_ir.assert_called_once_with(expected_result)

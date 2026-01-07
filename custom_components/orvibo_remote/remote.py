@@ -3,15 +3,17 @@ from __future__ import annotations
 
 import sys
 import logging
+import voluptuous as vol
 from base64 import b64decode
 from collections.abc import Iterable
-from typing import Any, Dict, Iterator, List, Union
-from pprint import pprint
+from typing import Any
 
-from homeassistant.components.remote import RemoteEntity
+import homeassistant.helpers.config_validation as cv
+from homeassistant.const import CONF_IP_ADDRESS, CONF_NAME
+from homeassistant.components.remote import RemoteEntity, PLATFORM_SCHEMA
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType
+from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from .orvibo.orvibo import Orvibo, OrviboException
 
@@ -20,97 +22,72 @@ _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_NAME = "Orvibo AllOne remote"
 
+PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
+    vol.Required(CONF_IP_ADDRESS): cv.string,
+    vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
+})
 
-async def async_setup_platform(
+def setup_platform(
     hass: HomeAssistant,
-    config_entry: ConfigType,
-    async_add_entities: AddEntitiesCallback,
-    discovery_info=None,
+    config: ConfigType,
+    add_entities: AddEntitiesCallback,
+    discovery_info: DiscoveryInfoType | None = None,
 ):
     """Set up the AllOne remotes platform."""
 
+    ip_address = config[CONF_IP_ADDRESS]
+    name = config[CONF_NAME]
+
     devices = []
-
-    _LOGGER.info("System byte order is %s", sys.byteorder)
-
     try:
-        discovered_devices: Dict[str, List[str]] = Orvibo.discover()
-        discovered_devices_payload: Iterator[List[str]] = filter(
-            lambda x: x[2] == Orvibo.TYPE_IRDA, discovered_devices.values()
-        )
-
-        for discovered_device_payload in discovered_devices_payload:
-            ip = discovered_device_payload[0]
-            try:
-                device = Orvibo(*discovered_device_payload)
-                instance = OrviboRemote(DEFAULT_NAME, device)
-
-                if instance:
-                    _LOGGER.info("Initialized AllOne at %s", ip)
-                    devices.append(instance)
-                else:
-                    _LOGGER.error(
-                        "Unable to find provided AllOne instance at %s",
-                        ip,
-                    )
-            except Exception as e:
-                _LOGGER.error("AllOne at %s couldn't be initialized", ip, e)
-    except OrviboException as e:
-        _LOGGER.error("Unable to discover AllOne devices", e)
+        device: Orvibo = Orvibo.discover(ip=ip_address) # pyright: ignore[reportAssignmentType]
+        add_entities([OrviboRemote(name, device)])
+    except OrviboException:
+        _LOGGER.exception("Unable to discover AllOne devices")
 
     if not len(devices):
         _LOGGER.warning("No AllOne device has been found in network")
 
-    async_add_entities(devices)
-
-
-async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigType,
-    async_add_entities: AddEntitiesCallback,
-):
-    """Set up the AllOne remotes config entry."""
-    await async_setup_platform(hass, config_entry, async_add_entities)
+    add_entities(devices)
 
 
 class OrviboRemote(RemoteEntity):
     """Representation of a AllOne Remote."""
 
     device: Orvibo
-    _attr_is_on: bool = False
 
     def __init__(self, name: str, device: Orvibo) -> None:
         """Initialize the entity."""
         self._name = name
         self._device = device
 
-        self._attr_unique_id = self._device.mac.hex()
+        if self._device.mac is not None:
+            self._attr_unique_id = self._device.mac.hex()
+        else:
+            self._attr_unique_id = f"orvibo-{sys.maxsize - id(self)}"
 
-    @property
-    def is_on(self) -> bool:
-        """Return True if entity is on."""
-        return self._attr_is_on
-
-    def turn_on(self, **kwargs: Any) -> None:
-        _LOGGER.warning("Turn on is not implemented for this platform")
-        self._attr_is_on = True
-
-    def turn_off(self, **kwargs: Any) -> None:
-        _LOGGER.warning("Turn off is not implemented for this platform")
-        self._attr_is_on = False
-
-    def _decode_command(self, command: Union[str, bytes]) -> bytes:
+    def _decode_command(self, command: str | bytes | bytearray) -> bytes:
         """Decode command in format that is suitable for IR emitting"""
-        if type(command) is str and command.startswith("b64:"):
-            return b64decode(command.replace("b64:", ""))
-        elif type(command) is bytes:
+        if isinstance(command, str):
+            if command.startswith("b64:"):
+                return b64decode(command[4:])
+            raise ValueError("Unable to decode the command")
+
+        if isinstance(command, bytearray):
+            return bytes(command)
+
+        if isinstance(command, bytes):
             # No need to decode, assuming it is raw
             return command
 
         raise ValueError("Unable to decode the command")
 
-    async def async_send_command(self, command: Iterable[str], **kwargs: Any) -> None:
+    def send_command(self, command: Iterable[str | bytes], **kwargs: Any) -> None:
         """Send a command to device."""
+        if command is None:
+            _LOGGER.debug("No command provided to send")
+            return
+
         for encoded_command in command:
             raw_command = self._decode_command(encoded_command)
             _LOGGER.info("Running AllOne command => [%s]", raw_command.hex())
