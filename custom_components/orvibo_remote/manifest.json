@@ -3,6 +3,7 @@
     "name": "Orvibo AllOne remote",
     "documentation": "https://github.com/nergal/homeassistant-orvibo-remote",
     "requirements": [],
+    "config_flow": true,
     "codeowners": ["@nergal"],
     "iot_class": "local_push",
     "version": "0.0.3"

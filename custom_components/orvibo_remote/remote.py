@@ -40,6 +40,7 @@ def setup_platform(
 
     devices = []
     try:
+        _LOGGER.debug("Discovering AllOne device at IP %s", ip_address)
         device: Orvibo = Orvibo.discover(ip=ip_address) # pyright: ignore[reportAssignmentType]
         add_entities([OrviboRemote(name, device)])
     except OrviboException:

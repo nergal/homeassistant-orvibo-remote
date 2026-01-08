@@ -1,9 +1,9 @@
 {
   "config": {
     "step": {
-      "init": {
+      "user": {
         "data": {
-          "ip": "[%key:common::config_flow::data::ip%]",
+          "ip_address": "[%key:common::config_flow::data::ip_address%]",
           "name": "[%key:common::config_flow::data::name%]"
         }
       }
